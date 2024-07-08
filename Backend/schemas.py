@@ -12,12 +12,18 @@ class MCQResponse(BaseModel):
     responses: Dict[str, List[Any]]
 
 class DescriptiveData(BaseModel):
-    question_id: int  # Updated from Q_id to question_id
+    question_id: int
     question: str
     Student_answer: str
     marks: int
     student_id: int
 
+class DescriptiveResultCreate(BaseModel):
+    question_id: int
+    question: str
+    Student_answer: str
+    marks: int
+    student_id: int
 class DescriptiveResponse(BaseModel):
     score: int
     responses: Dict[str, List[Any]]
@@ -29,11 +35,6 @@ class MCQResultCreate(BaseModel):
     score: float
     student_id: int
 
-class DescriptiveResultCreate(BaseModel):
-    question_id: int
-    student_answer: str
-    marks: float
-    student_id: int
 
 class StudentPerformanceCreate(BaseModel):
     student_id: int

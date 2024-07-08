@@ -68,20 +68,24 @@ const Mcq = () => {
   };
 
   const handleSubmit = async () => {
-    const answers = selectedAnswers.map((answer, index) => ({
-      Q_id: index.toString(),
-      Student_answer: answer !== null ? questions[index].options[answer] : 'Not answered',
-      correct_answer: questions[index].options[questions[index].answerIndex],
-      student_id: '0',
-    }));
+    const Q_id = questions.map((_, index) => index);
+    const Student_answer = selectedAnswers.map((answer, index) => answer !== null ? questions[index].options[answer] : 'Not answered');
+    const correct_answer = questions.map((q) => q.options[q.answerIndex]);
+    const student_id = 0;
+
+    const payload = { Q_id, Student_answer, correct_answer, student_id };
+
+    console.log('Payload:', payload);
 
     try {
-      const response = await axios.post('http://localhost:8000/mcq/', { answers });
+      const response = await axios.post('http://localhost:8000/mcq/', payload);
       console.log('Response data:', response.data);
       navigate('/');
     } catch (error: any) {
       console.error('Error submitting MCQ answers:', error);
-      // ... (rest of the error handling code)
+      if (error.response && error.response.data) {
+        console.error('Error details:', error.response.data.detail);
+      }
     }
   };
 

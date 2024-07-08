@@ -1,7 +1,8 @@
 import os
 import matplotlib.pyplot as plt
 
-def generate_and_save_graphs(correct: int, incorrect: int, score: int, output_folder: str):
+def generate_and_save_graphs(correct: int, incorrect: int, score: int):
+    output_folder = r"C:\Users\abhishek\Desktop\Scora\Dashboard\src\sampleImages"
     os.makedirs(output_folder, exist_ok=True)
 
     graphs = []
@@ -9,6 +10,7 @@ def generate_and_save_graphs(correct: int, incorrect: int, score: int, output_fo
     data = [correct, incorrect]
     labels = ['Correct', 'Incorrect']
 
+    # Bar Plot
     plt.figure()
     plt.bar(labels, data)
     plt.title('Correct vs Incorrect Answers')
@@ -19,6 +21,7 @@ def generate_and_save_graphs(correct: int, incorrect: int, score: int, output_fo
     graphs.append(bar_plot_path)
     plt.close()
 
+    # Pie Chart
     plt.figure()
     plt.pie(data, labels=labels, autopct='%1.1f%%')
     plt.title('Correct vs Incorrect Answers')
@@ -27,6 +30,7 @@ def generate_and_save_graphs(correct: int, incorrect: int, score: int, output_fo
     graphs.append(pie_chart_path)
     plt.close()
 
+    # Line Plot
     plt.figure()
     plt.plot(['Correct', 'Incorrect', 'Score'], [correct, incorrect, score], marker='o')
     plt.title('Performance Line Plot')
@@ -37,6 +41,7 @@ def generate_and_save_graphs(correct: int, incorrect: int, score: int, output_fo
     graphs.append(line_plot_path)
     plt.close()
 
+    # Histogram
     plt.figure()
     plt.hist([correct, incorrect, score], bins=3, edgecolor='black')
     plt.title('Histogram of Performance Metrics')

@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './test2.scss';
 
-interface AnswersState {
-  answer1: string;
-  answer2: string;
-  answer3: string;
-  answer4: string;
-  answer5: string;
+interface Answer {
+  question_id: number;
+  question: string;
+  Student_answer: string;
+  marks: number;
+  student_id: number;
 }
 
 const questions = [
@@ -20,65 +20,27 @@ const questions = [
 ];
 
 const DescriptiveQuestions: React.FC = () => {
-  const [answers, setAnswers] = useState<AnswersState>({
-    answer1: '',
-    answer2: '',
-    answer3: '',
-    answer4: '',
-    answer5: '',
-  });
+  const [answers, setAnswers] = useState<Answer[]>(questions.map((question, index) => ({
+    question_id: index + 1,
+    question: question,
+    Student_answer: '',
+    marks: 0,
+    student_id: 1
+  })));
   const navigate = useNavigate();
 
-  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setAnswers(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>, question_id: number) => {
+    const { value } = e.target;
+    setAnswers(prevAnswers => prevAnswers.map(answer =>
+      answer.question_id === question_id ? { ...answer, Student_answer: value } : answer
+    ));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const data = [
-      {
-        Q_id: 1,
-        question: questions[0],
-        Student_answer: answers.answer1,
-        marks: 0,
-        student_id: 1 // Replace with dynamic student ID if necessary
-      },
-      {
-        Q_id: 2,
-        question: questions[1],
-        Student_answer: answers.answer2,
-        marks: 0,
-        student_id: 1
-      },
-      {
-        Q_id: 3,
-        question: questions[2],
-        Student_answer: answers.answer3,
-        marks: 0,
-        student_id: 1
-      },
-      {
-        Q_id: 4,
-        question: questions[3],
-        Student_answer: answers.answer4,
-        marks: 0,
-        student_id: 1
-      },
-      {
-        Q_id: 5,
-        question: questions[4],
-        Student_answer: answers.answer5,
-        marks: 0,
-        student_id: 1
-      }
-    ];
 
     try {
-      await axios.post('http://localhost:8000/descriptive/', data);
+      await axios.post('http://localhost:8000/descriptive/', answers);
       navigate('/'); // Redirect to the home page after submission
     } catch (error) {
       console.error('Error submitting answers:', error);
@@ -89,14 +51,14 @@ const DescriptiveQuestions: React.FC = () => {
     <div className="app-container">
       <h1 className="quiz-heading">Descriptive Questions</h1>
       <form onSubmit={handleSubmit}>
-        {questions.map((question, index) => (
-          <div key={index} className="question-container">
-            <label htmlFor={`answer${index + 1}`} className="question-text">{`Question ${index + 1}: ${question}`}</label>
+        {answers.map((answer) => (
+          <div key={answer.question_id} className="question-container">
+            <label htmlFor={`answer${answer.question_id}`} className="question-text">{`Question ${answer.question_id}: ${answer.question}`}</label>
             <textarea
-              id={`answer${index + 1}`}
-              name={`answer${index + 1}`}
-              value={answers[`answer${index + 1}` as keyof AnswersState]}
-              onChange={handleChange}
+              id={`answer${answer.question_id}`}
+              name={`answer${answer.question_id}`}
+              value={answer.Student_answer}
+              onChange={(e) => handleChange(e, answer.question_id)}
               className="answer-textarea"
               rows={4}
             />
