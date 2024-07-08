@@ -5,13 +5,14 @@ class MCQData(BaseModel):
     Q_id: List[int]
     Student_answer: List[str]
     correct_answer: List[str]
+    student_id: int
 
 class MCQResponse(BaseModel):
     score: int
     responses: Dict[str, List[Any]]
 
 class DescriptiveData(BaseModel):
-    Q_id: int
+    question_id: int  # Updated from Q_id to question_id
     question: str
     Student_answer: str
     marks: int
@@ -22,14 +23,14 @@ class DescriptiveResponse(BaseModel):
     responses: Dict[str, List[Any]]
 
 class MCQResultCreate(BaseModel):
-    q_id: int
+    question_id: int
     student_answer: str
     correct_answer: str
     score: float
+    student_id: int
 
 class DescriptiveResultCreate(BaseModel):
-    q_id: int
-    question: str
+    question_id: int
     student_answer: str
     marks: float
     student_id: int
@@ -46,13 +47,13 @@ class MCQResult(BaseModel):
     student_answer: str
     correct_answer: str
     score: float
+    student_id: int  # Ensure this matches the database schema
 
     class Config:
         orm_mode = True
 
 class DescriptiveResult(BaseModel):
-    q_id: int
-    question: str
+    question_id: int
     student_answer: str
     marks: float
     student_id: int
@@ -72,3 +73,10 @@ class StudentPerformance(BaseModel):
 
 class Courses(BaseModel):
     courses: List[str]
+
+class Student(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True

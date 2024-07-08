@@ -64,37 +64,25 @@ const Mcq = () => {
     const updatedAnswers = [...selectedAnswers];
     updatedAnswers[questionIndex] = optionIndex;
     setSelectedAnswers(updatedAnswers);
+    console.log('Selected answers:', updatedAnswers);
   };
 
   const handleSubmit = async () => {
     const answers = selectedAnswers.map((answer, index) => ({
-      q_id: index,  // Assuming q_id starts from 0 based on the API expectation
-      student_answer: answer !== null ? questions[index].options[answer] : 'Not answered',
+      Q_id: index.toString(),
+      Student_answer: answer !== null ? questions[index].options[answer] : 'Not answered',
       correct_answer: questions[index].options[questions[index].answerIndex],
-      score: answer === questions[index].answerIndex ? 1 : 0,
-      
+      student_id: '0',
     }));
 
     try {
       const response = await axios.post('http://localhost:8000/mcq/', { answers });
       console.log('Response data:', response.data);
-      navigate('/'); // Redirect to home page after successful submission
+      navigate('/');
     } catch (error: any) {
       console.error('Error submitting MCQ answers:', error);
-
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-
-        if (error.response.data.detail) {
-          error.response.data.detail.forEach((errDetail: any) => {
-            console.error('Validation error:', errDetail);
-          });
-        }
-      }
+      // ... (rest of the error handling code)
     }
-    console.log("Executed");
   };
 
   return (
@@ -114,12 +102,16 @@ const Mcq = () => {
                 onChange={() => handleAnswerSelect(index, optionIndex)}
                 className="radio-button"
               />
-              <label htmlFor={`q${index}-option${optionIndex}`} className="option-label">{option}</label>
+              <label htmlFor={`q${index}-option${optionIndex}`} className="option-label">
+                {option}
+              </label>
             </div>
           ))}
         </div>
       ))}
-      <button className="submit-button" onClick={handleSubmit}>Submit Answers</button>
+      <button className="submit-button" onClick={handleSubmit}>
+        Submit Answers
+      </button>
     </div>
   );
 };

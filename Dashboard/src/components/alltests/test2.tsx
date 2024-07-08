@@ -39,7 +39,6 @@ const DescriptiveQuestions: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-  console.log("Executed"); 
     const data = [
       {
         Q_id: 1,
@@ -84,7 +83,6 @@ const DescriptiveQuestions: React.FC = () => {
     } catch (error) {
       console.error('Error submitting answers:', error);
     }
-    console.log("Executed"); 
   };
 
   return (
@@ -104,7 +102,7 @@ const DescriptiveQuestions: React.FC = () => {
             />
           </div>
         ))}
-        <button  type="submit" className="submit-button">Submit Answers</button>
+        <button type="submit" className="submit-button">Submit Answers</button>
       </form>
     </div>
   );

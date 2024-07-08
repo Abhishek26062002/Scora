@@ -5,6 +5,7 @@ from database import SessionLocal, engine
 import models, schemas
 from generative_ai import EvaluateMCQ, EvaluateDescriptive, get_job_recommendations, get_course_recommendations
 from graphs import generate_and_save_graphs
+from typing import List
 
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)
@@ -39,7 +40,7 @@ def evaluate_mcq(mcq_data: schemas.MCQData, db: Session = Depends(get_db)):
 
 # Endpoint to evaluate descriptive data
 @app.post("/descriptive/", response_model=schemas.DescriptiveResponse)
-def evaluate_descriptive(descriptive_data: schemas.DescriptiveData, db: Session = Depends(get_db)):
+def evaluate_descriptive(descriptive_data: List[schemas.DescriptiveData], db: Session = Depends(get_db)):
     try:
         score, responses = EvaluateDescriptive(descriptive_data, db)
         return {"score": score, "responses": responses}
@@ -51,7 +52,7 @@ def evaluate_descriptive(descriptive_data: schemas.DescriptiveData, db: Session 
 def job_recommendations(courses: schemas.Courses):
     try:
         recommendations = get_job_recommendations(courses.courses)
-        return {"recommendations": recommendations}
+        return {"courses": recommendations}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -60,7 +61,7 @@ def job_recommendations(courses: schemas.Courses):
 def course_recommendations(courses: schemas.Courses):
     try:
         recommendations = get_course_recommendations(courses.courses)
-        return {"recommendations": recommendations}
+        return {"courses": recommendations}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -79,5 +80,14 @@ def get_test_performance_graphs(student_id: int, output_folder: str, db: Session
 
         images = generate_and_save_graphs(correct, incorrect, score, output_folder)
         return {"images": images}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Endpoint to get all students
+@app.get("/students/", response_model=List[schemas.Student])
+def get_students(db: Session = Depends(get_db)):
+    try:
+        students = db.query(models.Student).all()
+        return students
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

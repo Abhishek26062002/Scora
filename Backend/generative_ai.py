@@ -1,73 +1,73 @@
 import google.generativeai as genai
 from sqlalchemy.orm import Session
-from schemas import DescriptiveData
 import models
+from typing import List, Tuple, Dict, Any
+import schemas
+from models import MCQResult
 
+# Configure the Google Generative AI API key
 GOOGLE_API_KEY = "AIzaSyCyq0jbEgSC9C-TykrFFVUK5_wQVhpjnS8"
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-pro')
 
-def EvaluateMCQ(data, db: Session):
+def EvaluateMCQ(data: schemas.MCQData, db: Session) -> Tuple[int, Dict[str, Any]]:
     score = 0
     neg = -1
     pos = 2
     responses = {"Q_id": [], "score": []}
-    for i in range(len(data["Q_id"])):
-        if data["Student_answer"][i] is None:
-            responses["Q_id"].append(data["Q_id"][i])
-            responses["score"].append(0)
-            db_mcq_result = models.MCQResult(
-                question_id=data["Q_id"][i],
-                student_answer=data["Student_answer"][i],
-                correct_answer=data["correct_answer"][i],
-                score=0
-            )
-        elif data["Student_answer"][i] == data["correct_answer"][i]:
-            responses["Q_id"].append(data["Q_id"][i])
-            responses["score"].append(pos)
+    
+    for i in range(len(data.Q_id)):
+        question_id = data.Q_id[i]
+        student_answer = data.Student_answer[i]
+        correct_answer = data.correct_answer[i]
+        
+        if student_answer is None:
+            question_score = 0
+        elif student_answer == correct_answer:
+            question_score = pos
             score += pos
-            db_mcq_result = models.MCQResult(
-                question_id=data["Q_id"][i],
-                student_answer=data["Student_answer"][i],
-                correct_answer=data["correct_answer"][i],
-                score=pos
-            )
         else:
-            responses["Q_id"].append(data["Q_id"][i])
-            responses["score"].append(neg)
+            question_score = neg
             score += neg
-            db_mcq_result = models.MCQResult(
-                question_id=data["Q_id"][i],
-                student_answer=data["Student_answer"][i],
-                correct_answer=data["correct_answer"][i],
-                score=neg
-            )
+        
+        responses["Q_id"].append(question_id)
+        responses["score"].append(question_score)
+        
+        db_mcq_result = MCQResult(
+            question_id=question_id,
+            student_answer=student_answer,
+            correct_answer=correct_answer,
+            score=question_score
+        )
         db.add(db_mcq_result)
-        db.commit()
-        db.refresh(db_mcq_result)
+    
+    db.commit()  # Commit after the loop
     return score, responses
 
-def EvaluateDescriptive(data: DescriptiveData, db: Session):
-    response = model.generate_content(
-        f"question: {data.question} student answer: {data.Student_answer} evaluate this answer for the above question with student answer and give me marks out of {data.marks} in numerical format. give me only marks. don't give anything except marks"
-    )
-    
-    score = int(response.text)
-    
-    db_descriptive_result = models.DescriptiveResult(
-        q_id=data.Q_id,
-        question=data.question,
-        student_answer=data.Student_answer,
-        marks=score,
-        student_id=data.student_id
-    )
-    
-    db.add(db_descriptive_result)
-    db.commit()
-    db.refresh(db_descriptive_result)
-    
-    return score
 
+def EvaluateDescriptive(data: List[schemas.DescriptiveData], db: Session):
+    Marks = 0
+    Responses = {"Q_id": [], "score": []}
+    for item in data:
+        question = item.question
+        answer = item.Student_answer
+        marks = str(item.marks)
+        response = model.generate_content(f"question: {question} student answer: {answer} evaluate this answer for the above question with student answer and give me marks out of {marks} in numerical format. give me only marks. don't give anything except marks")
+        Responses["Q_id"].append(item.question_id)
+        Responses["score"].append(response.text)
+        Marks += int(response.text)
+
+        db_descriptive_result = models.DescriptiveResult(
+            question_id=item.question_id,
+            student_answer=item.Student_answer,
+            marks=int(response.text),
+            student_id=item.student_id
+        )
+        db.add(db_descriptive_result)
+        db.commit()
+        db.refresh(db_descriptive_result)
+
+    return Marks, Responses
 
 def get_job_recommendations(courses):
     response = model.generate_content(f"Provide 5 job recommendations for the following courses: {', '.join(courses)}")
@@ -75,6 +75,6 @@ def get_job_recommendations(courses):
     return recommendations
 
 def get_course_recommendations(courses):
-    response = model.generate_content(f"Provide 5 relevant courses recommendations for: {', '.join(courses)}")
+    response = model.generate_content(f"Provide 5 relevant course recommendations for the following courses: {', '.join(courses)}")
     recommendations = list(response.text.split('\n'))
     return recommendations
