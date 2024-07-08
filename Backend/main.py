@@ -6,6 +6,8 @@ import models, schemas
 from generative_ai import EvaluateMCQ, EvaluateDescriptive, get_job_recommendations, get_course_recommendations
 from graphs import generate_and_save_graphs
 from typing import List
+import requests
+from models import MCQData 
 
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)
@@ -91,3 +93,38 @@ def get_students(db: Session = Depends(get_db)):
         return students
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+    
+@app.post("/submit_mcq_data/")
+def submit_mcq_data(mcq_data: MCQData):
+    try:
+        # Fetch data from the /mcq/ endpoint
+        mcq_endpoint_url = "http://localhost:8000/mcq/"
+        response = requests.get(mcq_endpoint_url)
+        mcq_response_data = response.json()
+
+        # Process the retrieved data (example: logging)
+        print("Data retrieved from /mcq/ endpoint:", mcq_response_data)
+
+        # Process the submitted data (example: save to database)
+        # db.add(mcq_data)
+        # db.commit()
+
+        return {"message": "MCQ data submitted and processed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/mcq_results/{student_id}")
+def get_mcq_results(student_id: int, db: Session = Depends(get_db)):
+    results = crud.get_mcq_results(db, student_id)
+    if not results:
+        raise HTTPException(status_code=404, detail="MCQ results not found")
+    return results
+
+@app.get("/descriptive_results/{student_id}")
+def get_descriptive_results(student_id: int, db: Session = Depends(get_db)):
+    results = crud.get_descriptive_results(db, student_id)
+    if not results:
+        raise HTTPException(status_code=404, detail="Descriptive results not found")
+    return results

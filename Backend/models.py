@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from database import Base
@@ -71,3 +72,10 @@ class Option(Base):
 
     # Relationships
     question = relationship('Question', back_populates='options')
+
+
+class MCQData(BaseModel):
+    Q_id: int
+    Student_answer: str
+    correct_answer: str
+    student_id: int
