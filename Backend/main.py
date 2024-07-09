@@ -8,6 +8,7 @@ from graphs import generate_and_save_graphs
 from typing import List
 import requests
 from models import MCQData 
+import crud
 
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)

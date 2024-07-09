@@ -1,14 +1,49 @@
-.Courses{
-
-  .info{
+.Courses {
+  .info {
     display: flex;
     align-items: center;
     gap: 20px;
     margin-bottom: 20px;
+    
 
-    button{
+    button {
       padding: 5px;
       cursor: pointer;
+      margin-left: 20px;
+      background-color: rgb(212, 212, 215);
+      border-radius :5px;
+      height: 30px;
+      width: 150px;
+
+    }
+  }
+
+  .recommendations {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .box {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background-color: hsl(0, 30%, 95%);
+      color: black;
+
+      h2 {
+        margin-top: 0;
+      }
+
+      ul {
+        list-style-type: none;
+        padding-left: 0;
+
+        li {
+          padding: 5px 0;
+          border-bottom: 1px solid #eee;
+        }
+      }
     }
   }
 }
